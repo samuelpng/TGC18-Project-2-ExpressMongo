@@ -1,0 +1,26 @@
+{
+  "name": "tgc18-project-2-expressmongo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samuelpng/TGC18-Project-2-ExpressMongo.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/samuelpng/TGC18-Project-2-ExpressMongo/issues"
+  },
+  "homepage": "https://github.com/samuelpng/TGC18-Project-2-ExpressMongo#readme",
+  "dependencies": {
+    "axios": "^0.27.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "mongodb": "^4.7.0"
+  }
+}
