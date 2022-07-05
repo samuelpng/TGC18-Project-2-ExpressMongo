@@ -1,10 +1,10 @@
 const express = require("express");
 const cors = require("cors");
 require("dotenv").config();
-const ObjectId = require("mongodb").ObjectId;
+const { ObjectId } = require("mongodb");
 const MongoUtil = require("./MongoUtil");
 
-const mongoUri = process.env.MONGO_URI;
+const MONGO_URI = process.env.MONGO_URI;
 
 let app = express();
 
@@ -17,25 +17,86 @@ app.use(cors());
 //SETUP END
 async function main() {
 
-  let db = await MongoUtil.connect(mongoUri, "bird_watching");
-  app.get('/', function(req,res){
+  let db = await MongoUtil.connect(MONGO_URI, "bird_watching");
+  app.get('/', function (req, res) {
     res.send('hello world')
   })
 
-  app.post('/bird_sightings', async function(req,res){
+  app.post('/bird_sightings', async function (req, res) {
     let birdSize = req.body.birdSize;
     let birdFamily = req.body.birdFamily;
     let birdSpecies = req.body.birdSpecies
-    let birdColours = req.body.birdColours.slice(',');
-    let dateSpotted = req.body.dateSpotted ? new Date(req.body.dateSpotted): new Date();
+    let birdColours = req.body.birdColours;
+    let dateSpotted = req.body.dateSpotted ? new Date(req.body.dateSpotted) : new Date();
     let neighbourhoodSpotted = req.body.neighbourhoodSpotted
     let lattitude = req.body.locationSpotted.lattitude;
     let longitude = req.body.locationSpotted.longitude;
     let imageUrl = req.body.imageUrl;
-    let eatingHabits = req.body.eatingHabitsAndBehaviour.eatingHabits.slice(',');
-    let behaviour = req.body.eatingHabitsAndBehaviour.behaviour.slice(',');
+    let eatingHabits = req.body.eatingHabitsAndBehaviour.eatingHabits;
+    let behaviour = req.body.eatingHabitsAndBehaviour.behaviour;
     let description = req.body.description;
-    let result = await db.collection('sightings').insertOne({
+    let results = await db.collection('sightings').insertOne({
+      birdSize,
+      birdFamily,
+      birdSpecies,
+      birdColours,
+      dateSpotted,
+      neighbourhoodSpotted,
+      lattitude,
+      longitude,
+      imageUrl,
+      'eatingHabitsAndBehaviou':{eatingHabits, behaviour},
+      behaviour,
+      description
+    })
+    res.status(201);
+    res.send(results);
+  })
+
+  app.get('/bird_sightings/:id', async function (req, res) {
+    res.json(await db.collection('sightings').findOne({
+      '_id': ObjectId(req.params.id)
+    }))
+  })
+
+  app.get('/bird_sightings', async function(req,res) {
+
+    let criteria = {};
+
+    if(req.query.birdFamily) {
+      criteria['birdFamily'] = {
+        '$regex' : req.query.birdFamily, '$options':'i'
+      }
+    }
+
+    if (req.query.birdColours) {
+      criteria['birdColours'] = {
+        '$in' : [req.query.birdColours]
+      }
+    }
+
+    let results = await db.collection('sightings').find(criteria)
+    res.status(200)
+    res.send(await results.toArray());
+  })
+
+  app.put('/bird_sightings/:id', async function (req, res) {
+    let birdSize = req.body.birdSize;
+    let birdFamily = req.body.birdFamily;
+    let birdSpecies = req.body.birdSpecies
+    let birdColours = req.body.birdColours;
+    let dateSpotted = req.body.dateSpotted ? new Date(req.body.dateSpotted) : new Date();
+    let neighbourhoodSpotted = req.body.neighbourhoodSpotted
+    let lattitude = req.body.locationSpotted.lattitude;
+    let longitude = req.body.locationSpotted.longitude;
+    let imageUrl = req.body.imageUrl;
+    let eatingHabits = req.body.eatingHabitsAndBehaviour.eatingHabits;
+    let behaviour = req.body.eatingHabitsAndBehaviour.behaviour;
+    let description = req.body.description;
+    let results = await db.collection('sightings').updateOne({
+      '_id': ObjectId(req.params.id)
+    }, {
+      '$set': {
         birdSize,
         birdFamily,
         birdSpecies,
@@ -48,18 +109,22 @@ async function main() {
         eatingHabits,
         behaviour,
         description
+      }
     })
-    res.status(201);
-    res.send(result);
-  })
-  
-  app.get('/bird_sightings/:id', async function(req,res){
-    res.json(await db.collection('sightings').findOne({
-      '_id': ObjectId(req.params.id)
-    }))
+    res.status(200);
+    res.json(results)
   })
 
-  
+  app.delete('/bird_sightings/:id', async function (req, res) {
+    let result = await db.collection('sightings').deleteOne({
+      '_id': ObjectId(req.params.id)
+    })
+    console.log(req.params.id, result)
+    res.status(200);
+    res.json({
+      'staus': 'ok'
+    })
+  })
 
 
 }
@@ -67,5 +132,5 @@ main();
 
 //START SERVER
 app.listen(3000, () => {
-    console.log("Server has started")
+  console.log("Server has started")
 })
