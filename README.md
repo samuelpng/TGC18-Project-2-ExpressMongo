@@ -73,4 +73,10 @@ Content in the website will be crowd sourced from the public and therefore, clea
 
 ### Skeleton
 
+<figure>
+    <img src="./pictures/WireFrame1.png" height="450" alt="Wireframe">
+    <img src="./pictures/WireFrame2.png" height="450" alt="Wireframe">
+</figure>
+
+
 #### Colour Scheme
