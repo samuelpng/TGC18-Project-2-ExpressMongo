@@ -15,6 +15,7 @@ app.use(express.json());
 app.use(cors());
 
 //SETUP END
+
 async function main() {
 
   let db = await MongoUtil.connect(MONGO_URI, "bird_watching");
@@ -25,15 +26,13 @@ async function main() {
   app.post('/bird_sightings', async function (req, res) {
     let birdSize = req.body.birdSize;
     let birdFamily = req.body.birdFamily;
-    let birdSpecies = req.body.birdSpecies
+    let birdSpecies = req.body.birdSpecies;
     let birdColours = req.body.birdColours;
     let dateSpotted = req.body.dateSpotted ? new Date(req.body.dateSpotted) : new Date();
     let neighbourhoodSpotted = req.body.neighbourhoodSpotted
-    let lattitude = req.body.locationSpotted.lattitude;
-    let longitude = req.body.locationSpotted.longitude;
+    let locationSpotted = req.body.locationSpotted;
     let imageUrl = req.body.imageUrl;
-    let eatingHabits = req.body.eatingHabitsAndBehaviour.eatingHabits;
-    let behaviour = req.body.eatingHabitsAndBehaviour.behaviour;
+    let character = req.body.character
     let description = req.body.description;
     let results = await db.collection('sightings').insertOne({
       birdSize,
@@ -42,15 +41,28 @@ async function main() {
       birdColours,
       dateSpotted,
       neighbourhoodSpotted,
-      lattitude,
-      longitude,
+      locationSpotted,
       imageUrl,
-      'eatingHabitsAndBehaviou':{eatingHabits, behaviour},
-      behaviour,
+      character,
       description
     })
-    res.status(201);
-    res.send(results);
+
+    if (typeof(birdSize) !== 'number' || (birdSize<1 || birdSize >5) ){
+      res.status(406).send('birdSize error')
+    }else if (typeof(birdFamily) !== "string"){
+      res.status(406).send('birdFamily error')
+    }else if (typeof(birdSpecies) !== "string"){
+      res.status(406).send('birdSpecies error')
+    }else if (typeof(birdColours) !== "object"){
+      res.status(406).send('birdColours error')
+    }else if (typeof(neighbourhoodSpotted) !== "string"){
+      res.status(406).send('neighbourhoodSpotted error')
+    }else if (typeof(locationSpotted) !== "object"){
+      res.status(406).send('locationSpotted error')
+    }else{
+      res.status(200);
+      res.send(results);
+    }  
   })
 
   app.get('/bird_sightings/:id', async function (req, res) {
@@ -79,6 +91,7 @@ async function main() {
     res.status(200)
     res.send(await results.toArray());
   })
+
 
   app.put('/bird_sightings/:id', async function (req, res) {
     let birdSize = req.body.birdSize;
