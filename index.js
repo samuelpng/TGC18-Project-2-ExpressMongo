@@ -87,6 +87,8 @@ async function main() {
       }
     }
 
+    
+
     let results = await db.collection('sightings').find(criteria)
     res.status(200)
     res.send(await results.toArray());
