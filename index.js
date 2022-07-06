@@ -87,8 +87,25 @@ async function main() {
       }
     }
 
-    
+    if (req.query.birdSize) {
+      criteria['birdSize'] = {
+        '$eq' : [req.query.birdSize]
+      }
+    }
 
+    if (req.query.neighbourhoodSpotted) {
+      criteria['neighbourhoodSpotted'] = {
+        '$in' : [req.query.neighbourhoodSpotted]
+      }
+    }
+
+    // if (req.query.sortBySize) {
+    //   criteria['neighbourhoodSpotted'] = {
+    //     '$sort' : [req.query.birdSize]
+    //   }
+    // }
+
+    
     let results = await db.collection('sightings').find(criteria)
     res.status(200)
     res.send(await results.toArray());
