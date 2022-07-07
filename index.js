@@ -81,10 +81,38 @@ async function main() {
       }
     }
 
+    // if(req.query.birdSpecies) {
+    //   criteria['birdSpecies'] = {
+    //     '$regex' : req.query.birdSpecies, '$options':'i'
+    //   }
+    // }
+
     if (req.query.birdColours) {
+    // assuming that birdColors will be an array
+    // and you want to do AND query
+
+    if (req.query.birdColours.length === 1) {
       criteria['birdColours'] = {
         '$in' : [req.query.birdColours]
       }
+    } else {
+      criteria['$and'] = req.query.birdColours.map(colour => { return {"birdColours": {"$in" : [colour] } }});
+      
+      // url: ?birdColours=red,blue
+
+      // ["red", "blue"]
+      // {
+      //   $and: [
+      //     {"birdColors": { $in: ["red"]}},
+      //     {"birdColors": { $in: ["blue"]}},
+      //   ]
+      // }
+    }
+
+
+      // criteria['birdColours'] = {
+      //   '$in' : [...req.query.birdColours]
+      // }
     }
 
     if (req.query.birdSize) {
@@ -99,11 +127,11 @@ async function main() {
       }
     }
 
-    // if (req.query.sortBySize) {
-    //   criteria['neighbourhoodSpotted'] = {
-    //     '$sort' : [req.query.birdSize]
-    //   }
-    // }
+    if (req.query.sortBySize) {
+      criteria['neighbourhoodSpotted'] = {
+        '$sort' : [req.query.birdSize]
+      }
+    }
 
     
     let results = await db.collection('sightings').find(criteria)
