@@ -23,6 +23,31 @@ async function main() {
     res.send('hello world')
   })
 
+  
+  app.post('/bird_sightings/comments/:id', async function(req,res){
+    let commentId = new ObjectId();
+    let displayName = req.body.displayName;
+    let datePosted = new Date();
+    let commentDescription = req.body.commentDescription;
+    let result = await db.collection('sightings').updateOne({
+      _id: ObjectId(req.params.id)
+    },{
+      $push: {
+        comments: {commentId, displayName, datePosted, commentDescription}
+      }
+    })
+    res.status(200).json(result)
+
+    // if (typeof(commentDescription) !== "string"){
+    //   res.status(406).send('description error')
+    // }else {
+    //   res.status(200);
+    //   res.send(result.id);
+    //   // res.send(result.id)
+    // }
+
+  })
+
   app.post('/bird_sightings', async function (req, res) {
     let birdSize = req.body.birdSize;
     let birdFamily = req.body.birdFamily;
@@ -34,7 +59,7 @@ async function main() {
     let imageUrl = req.body.imageUrl;
     let character = req.body.character
     let description = req.body.description;
-    let results = await db.collection('sightings').insertOne({
+    let result = await db.collection('sightings').insertOne({
       birdSize,
       birdFamily,
       birdSpecies,
@@ -47,22 +72,22 @@ async function main() {
       description
     })
 
-    if (typeof(birdSize) !== 'number' || (birdSize<1 || birdSize >5) ){
-      res.status(406).send('birdSize error')
-    }else if (typeof(birdFamily) !== "string"){
-      res.status(406).send('birdFamily error')
-    }else if (typeof(birdSpecies) !== "string"){
-      res.status(406).send('birdSpecies error')
-    }else if (typeof(birdColours) !== "object"){
-      res.status(406).send('birdColours error')
-    }else if (typeof(neighbourhoodSpotted) !== "string"){
-      res.status(406).send('neighbourhoodSpotted error')
-    }else if (typeof(locationSpotted) !== "object"){
-      res.status(406).send('locationSpotted error')
-    }else{
+    // if (typeof(birdSize) !== 'number' || (birdSize<1 || birdSize >5) ){
+    //   res.status(406).send('birdSize error')
+    // }else if (typeof(birdFamily) !== "string"){
+    //   res.status(406).send('birdFamily error')
+    // }else if (typeof(birdSpecies) !== "string"){
+    //   res.status(406).send('birdSpecies error')
+    // }else if (typeof(birdColours) !== "object"){
+    //   res.status(406).send('birdColours error')
+    // }else if (typeof(neighbourhoodSpotted) !== "string"){
+    //   res.status(406).send('neighbourhoodSpotted error')
+    // }else if (typeof(locationSpotted) !== "object"){
+    //   res.status(406).send('locationSpotted error')
+    // }else{
       res.status(200);
-      res.send(results);
-    }  
+      res.send(result);
+    // }  
   })
 
   app.get('/bird_sightings/:id', async function (req, res) {
@@ -98,6 +123,7 @@ async function main() {
     } else {
       criteria['$and'] = req.query.birdColours.map(colour => { return {"birdColours": {"$in" : [colour] } }});
       
+
       // url: ?birdColours=red,blue
 
       // ["red", "blue"]
@@ -117,7 +143,7 @@ async function main() {
 
     if (req.query.birdSize) {
       criteria['birdSize'] = {
-        '$eq' : [req.query.birdSize]
+        '$eq' : parseInt(req.query.birdSize)
       }
     }
 
@@ -191,6 +217,6 @@ async function main() {
 main();
 
 //START SERVER
-app.listen(3000, () => {
+app.listen(8000, () => {
   console.log("Server has started")
 })
