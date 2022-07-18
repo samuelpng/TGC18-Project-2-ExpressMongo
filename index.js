@@ -53,12 +53,14 @@ async function main() {
     let birdFamily = req.body.birdFamily;
     let birdSpecies = req.body.birdSpecies;
     let birdColours = req.body.birdColours;
-    let dateSpotted = req.body.dateSpotted ? new Date(req.body.dateSpotted) : new Date();
+    let dateSpotted = req.body.dateSpotted;
     let neighbourhoodSpotted = req.body.neighbourhoodSpotted
     let locationSpotted = req.body.locationSpotted;
     let imageUrl = req.body.imageUrl;
     let character = req.body.character
-    let description = req.body.description;
+    let datePosted = new Date();
+    let displayName = req.body.displayName;
+    let email = req.body.email;
     let result = await db.collection('sightings').insertOne({
       birdSize,
       birdFamily,
@@ -69,25 +71,27 @@ async function main() {
       locationSpotted,
       imageUrl,
       character,
-      description
+      datePosted,
+      displayName,
+      email
     })
 
-    // if (typeof(birdSize) !== 'number' || (birdSize<1 || birdSize >5) ){
-    //   res.status(406).send('birdSize error')
-    // }else if (typeof(birdFamily) !== "string"){
-    //   res.status(406).send('birdFamily error')
-    // }else if (typeof(birdSpecies) !== "string"){
-    //   res.status(406).send('birdSpecies error')
-    // }else if (typeof(birdColours) !== "object"){
-    //   res.status(406).send('birdColours error')
-    // }else if (typeof(neighbourhoodSpotted) !== "string"){
-    //   res.status(406).send('neighbourhoodSpotted error')
-    // }else if (typeof(locationSpotted) !== "object"){
-    //   res.status(406).send('locationSpotted error')
-    // }else{
+    if (typeof(birdSize) !== 'number' || (birdSize<1 || birdSize >5) ){
+      res.status(406).send('birdSize error')
+    }else if (typeof(birdFamily) !== "string"){
+      res.status(406).send('birdFamily error')
+    }else if (typeof(birdSpecies) !== "string"){
+      res.status(406).send('birdSpecies error')
+    }else if (typeof(birdColours) !== "object"){
+      res.status(406).send('birdColours error')
+    }else if (typeof(neighbourhoodSpotted) !== "string"){
+      res.status(406).send('neighbourhoodSpotted error')
+    }else if (typeof(locationSpotted) !== "object"){
+      res.status(406).send('locationSpotted error')
+    }else{
       res.status(200);
       res.send(result);
-    // }  
+    }  
   })
 
   app.get('/bird_sightings/:id', async function (req, res) {
@@ -96,73 +100,121 @@ async function main() {
     }))
   })
 
+
+  //search and filtering 
   app.get('/bird_sightings', async function(req,res) {
 
     let criteria = {};
-
-    if(req.query.birdFamily) {
-      criteria['birdFamily'] = {
-        '$regex' : req.query.birdFamily, '$options':'i'
+    let projection = {
+      projection:{
+          "email": 0
       }
     }
 
-    // if(req.query.birdSpecies) {
-    //   criteria['birdSpecies'] = {
-    //     '$regex' : req.query.birdSpecies, '$options':'i'
+    //search
+    if (req.query.searchQuery){
+      criteria['$or'] = [
+        {
+          'birdFamily' : {
+            '$regex': `${req.query.searchQuery}`,
+            '$options': 'i'
+          }
+        },
+        {
+          'birdSpecies': {
+            '$regex': `${req.query.searchQuery}`,
+            '$options': 'i'
+          }
+        },
+        {
+          'birdColours': {
+            '$regex': `${req.query.searchQuery}`,
+            '$options': 'i'
+          }
+        },
+        {
+          'neighbourhoodSpotted': {
+            '$regex': `${req.query.searchQuery}`,
+            '$options': 'i'
+          }
+        },
+        {
+          'displayName': {
+            '$regex': `${req.query.searchQuery}`,
+            '$options': 'i'
+          }
+        }
+      ]
+    }
+
+    //birdFamily
+    // if(req.query.birdFamily) {
+    //   criteria['birdFamily'] = {
+    //     '$regex' : req.query.birdFamily, '$options':'i'
     //   }
     // }
 
+    //query on bird colours
     if (req.query.birdColours) {
-    // assuming that birdColors will be an array
-    // and you want to do AND query
 
     if (req.query.birdColours.length === 1) {
       criteria['birdColours'] = {
-        '$in' : [req.query.birdColours]
+        '$in' : req.query.birdColours
       }
     } else {
-      criteria['$and'] = req.query.birdColours.map(colour => { return {"birdColours": {"$in" : [colour] } }});
-      
-
-      // url: ?birdColours=red,blue
-
-      // ["red", "blue"]
-      // {
-      //   $and: [
-      //     {"birdColors": { $in: ["red"]}},
-      //     {"birdColors": { $in: ["blue"]}},
-      //   ]
-      // }
+      criteria['$and'] = req.query.birdColours.map(colour => { return {"birdColours": {"$in" : [colour] } }});    
+      // url eg.: ?birdColours[]=red&birdColours[]=Brown
     }
-
-
       // criteria['birdColours'] = {
       //   '$in' : [...req.query.birdColours]
       // }
     }
 
+    //query on bird size
     if (req.query.birdSize) {
       criteria['birdSize'] = {
         '$eq' : parseInt(req.query.birdSize)
       }
     }
 
+    //query on neighbouhood
     if (req.query.neighbourhoodSpotted) {
       criteria['neighbourhoodSpotted'] = {
         '$in' : [req.query.neighbourhoodSpotted]
       }
     }
 
+    //query on bird family
+    if (req.query.birdFamily) {
+      criteria['birdFamily'] = {
+        '$in' : [req.query.birdFamily]
+      }
+    }
+
+    //sort
     if (req.query.sortBySize) {
-      criteria['neighbourhoodSpotted'] = {
+      criteria['birdSize'] = {
         '$sort' : [req.query.birdSize]
       }
     }
 
+    if (req.query.sortByDate) {
+      criteria['dateSpotted'] = {
+        '$sort' : req.query.dateSpotted
+      }
+    }
+
+    // if (req.query.limit) {
+    //  criteria
+    // }
+
     
-    let results = await db.collection('sightings').find(criteria)
+
+    
+    let results = await db.collection('sightings').find(criteria, projection).toArray()
     res.status(200)
-    res.send(await results.toArray());
+    console.log(criteria)
+    res.json(results);
   })
 
 
