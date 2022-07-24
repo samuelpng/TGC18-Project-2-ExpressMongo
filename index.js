@@ -100,6 +100,7 @@ async function main() {
     }))
   })
 
+  
 
   //search and filtering 
   app.get('/bird_sightings', async function(req,res) {
@@ -108,6 +109,24 @@ async function main() {
     let projection = {
       projection:{
           "email": 0
+      }
+    }
+
+    let sortBy = {};
+
+    if (req.query.sort) {
+      if (req.query.sort === "latest") {
+        sortBy = {
+          'datePosted': -1
+        } 
+      } else if (req.query.sort === "alphabetically") {
+        sortBy = {
+          'birdSpecies': 1
+        }
+      } else if (req.query.sort === "birdFamily") {
+        sortBy = {
+          'birdFamily': 1
+        }
       }
     }
 
@@ -171,13 +190,24 @@ async function main() {
     }
 
     //query on bird size
+    // if (req.query.birdSize) {
+    //   criteria['birdSize'] = {
+    //     '$eq' : parseInt(req.query.birdSize)
+    //   }
+    // }
+
+    // if (req.query.birdSize) {
+    //   criteria['birdSize'] = {
+    //     '$eq' : parseInt(req.query.birdSize)
+    //   }
+    // }
+
     if (req.query.birdSize) {
-      criteria['birdSize'] = {
-        '$eq' : parseInt(req.query.birdSize)
-      }
+      criteria['$or'] = req.query.birdSize.map(size => { return {"birdSize": {"$in" : [parseInt(size)] } }})
     }
 
-    //query on neighbouhood
+
+    //query on neighbourhood
     if (req.query.neighbourhoodSpotted) {
       criteria['neighbourhoodSpotted'] = {
         '$in' : [req.query.neighbourhoodSpotted]
@@ -204,6 +234,12 @@ async function main() {
       }
     }
 
+    if (req.query.email) {
+      criteria ['email'] = {
+        '$in' : [req.query.email]
+      }
+    }
+
     // if (req.query.limit) {
     //  criteria
     // }
@@ -211,11 +247,32 @@ async function main() {
     
 
     
-    let results = await db.collection('sightings').find(criteria, projection).toArray()
+    let results = await db.collection('sightings').find(criteria, projection).sort(sortBy).toArray()
     res.status(200)
     console.log(criteria)
     res.json(results);
   })
+
+  // app.get('/bird_sightings/profile', async function(req,res) {
+
+  //   let criteria = {};
+  //   let projection = {
+  //     projection:{
+  //         "email": 0
+  //     }
+  //   }
+
+  //   if (req.query.email) {
+  //     criteria['email'] = {
+  //       '$eq' : [req.query.birdFamily]
+  //     }
+  //   }
+
+  //   let results = await db.collection('sightings').find(criteria, projection).toArray()
+  //   res.status(200)
+  //   console.log(criteria)
+  //   res.json(results);
+  // })
 
 
   app.put('/bird_sightings/:id', async function (req, res) {
@@ -223,14 +280,14 @@ async function main() {
     let birdFamily = req.body.birdFamily;
     let birdSpecies = req.body.birdSpecies
     let birdColours = req.body.birdColours;
-    let dateSpotted = req.body.dateSpotted ? new Date(req.body.dateSpotted) : new Date();
+    let dateSpotted = req.body.dateSpotted;
     let neighbourhoodSpotted = req.body.neighbourhoodSpotted
-    let lattitude = req.body.locationSpotted.lattitude;
-    let longitude = req.body.locationSpotted.longitude;
+    let locationSpotted = req.body.locationSpotted;
     let imageUrl = req.body.imageUrl;
-    let eatingHabits = req.body.eatingHabitsAndBehaviour.eatingHabits;
-    let behaviour = req.body.eatingHabitsAndBehaviour.behaviour;
-    let description = req.body.description;
+    let character = req.body.character;
+    let displayName = req.body.displayName;
+    let email = req.body.email;
+    
     let results = await db.collection('sightings').updateOne({
       '_id': ObjectId(req.params.id)
     }, {
@@ -241,17 +298,18 @@ async function main() {
         birdColours,
         dateSpotted,
         neighbourhoodSpotted,
-        lattitude,
-        longitude,
+        locationSpotted,
         imageUrl,
-        eatingHabits,
-        behaviour,
-        description
+        character,
+        displayName,
+        email
       }
     })
     res.status(200);
     res.json(results)
   })
+
+
 
   app.delete('/bird_sightings/:id', async function (req, res) {
     let result = await db.collection('sightings').deleteOne({
@@ -269,9 +327,9 @@ async function main() {
 main();
 
 //START SERVER
-// app.listen(8000, () => {
-//   console.log("Server has started")
-// })
-app.listen(process.env.PORT, () => {
+app.listen(8000, () => {
   console.log("Server has started")
 })
+// app.listen(process.env.PORT, () => {
+//   console.log("Server has started")
+// })
