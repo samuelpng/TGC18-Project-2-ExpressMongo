@@ -3,6 +3,7 @@ const cors = require("cors");
 require("dotenv").config();
 const { ObjectId } = require("mongodb");
 const MongoUtil = require("./MongoUtil");
+const validation = require("./validation");
 
 const MONGO_URI = process.env.MONGO_URI;
 
@@ -61,37 +62,75 @@ async function main() {
     let datePosted = new Date();
     let displayName = req.body.displayName;
     let email = req.body.email;
-    let result = await db.collection('sightings').insertOne({
-      birdSize,
-      birdFamily,
-      birdSpecies,
-      birdColours,
-      dateSpotted,
-      neighbourhoodSpotted,
-      locationSpotted,
-      imageUrl,
-      character,
-      datePosted,
-      displayName,
-      email
-    })
+    // let result = await db.collection('sightings').insertOne({
+    //   birdSize,
+    //   birdFamily,
+    //   birdSpecies,
+    //   birdColours,
+    //   dateSpotted,
+    //   neighbourhoodSpotted,
+    //   locationSpotted,
+    //   imageUrl,
+    //   character,
+    //   datePosted,
+    //   displayName,
+    //   email
+    // })
 
-    if (typeof(birdSize) !== 'number' || (birdSize<1 || birdSize >5) ){
-      res.status(406).send('birdSize error')
-    }else if (typeof(birdFamily) !== "string"){
-      res.status(406).send('birdFamily error')
-    }else if (typeof(birdSpecies) !== "string"){
-      res.status(406).send('birdSpecies error')
-    }else if (typeof(birdColours) !== "object"){
-      res.status(406).send('birdColours error')
-    }else if (typeof(neighbourhoodSpotted) !== "string"){
-      res.status(406).send('neighbourhoodSpotted error')
-    }else if (typeof(locationSpotted) !== "object"){
-      res.status(406).send('locationSpotted error')
-    }else{
+    let fieldInputError = []
+
+    validation.validateDataTypeNumber(birdSize, fieldInputError)
+    validation.validateDataTypeString(birdFamily, fieldInputError) 
+    validation.validateDataTypeString(birdSpecies, fieldInputError) 
+    validation.validateDataTypeObject(birdColours, fieldInputError)
+    validation.validateDataTypeString(dateSpotted, fieldInputError)
+    validation.validateDataTypeString(neighbourhoodSpotted, fieldInputError)
+    validation.validateDataTypeObject(locationSpotted, fieldInputError)
+    validation.validateDataTypeString(imageUrl, fieldInputError)
+    validation.validateDataTypeString(displayName, fieldInputError)
+    validation.validateDataTypeString(email, fieldInputError)
+    
+    console.log(fieldInputError)
+
+    if (fieldInputError.length !== 0){
+      res.status(406).json({validationErrors : fieldInputError})
+    } else {
+      let result = await db.collection('sightings').insertOne({
+        birdSize,
+        birdFamily,
+        birdSpecies,
+        birdColours,
+        dateSpotted,
+        neighbourhoodSpotted,
+        locationSpotted,
+        imageUrl,
+        character,
+        datePosted,
+        displayName,
+        email
+      })
+
       res.status(200);
       res.send(result);
-    }  
+    }
+
+
+    // if (typeof(birdSize) !== 'number' || (birdSize<1 || birdSize >7) ){
+    //   res.status(406).send('birdSize error')
+    // }else if (typeof(birdFamily) !== "string"){
+    //   res.status(406).send('birdFamily error')
+    // }else if (typeof(birdSpecies) !== "string"){
+    //   res.status(406).send('birdSpecies error')
+    // }else if (typeof(birdColours) !== "object"){
+    //   res.status(406).send('birdColours error')
+    // }else if (typeof(neighbourhoodSpotted) !== "string"){
+    //   res.status(406).send('neighbourhoodSpotted error')
+    // }else if (typeof(locationSpotted) !== "object"){
+    //   res.status(406).send('locationSpotted error')
+    // }else{
+    //   res.status(200);
+    //   res.send(result);
+    // }  
   })
 
   app.get('/bird_sightings/:id', async function (req, res) {
@@ -327,9 +366,9 @@ async function main() {
 main();
 
 //START SERVER
-// app.listen(8000, () => {
-//   console.log("Server has started")
-// })
-app.listen(process.env.PORT, () => {
+app.listen(8000, () => {
   console.log("Server has started")
 })
+// app.listen(process.env.PORT, () => {
+//   console.log("Server has started")
+// })
