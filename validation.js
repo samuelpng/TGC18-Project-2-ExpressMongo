@@ -1,22 +1,23 @@
-async function validateDataTypeString(input, fieldInputError){
-    if (typeof(input) !== "string") {
-        return fieldInputError.push(input)
+function validateDataTypeString(input, fieldInputError, key){
+    if (typeof(input) !== "string" || !input) {
+        return fieldInputError.push(key)
     } else {
         return null
     }
 }
 
-async function validateDataTypeNumber(input, fieldInputError){
+function validateDataTypeNumber(input, fieldInputError, key){
     if (typeof(input) !== "number") {
-        return fieldInputError.push(input)
+        return fieldInputError.push(key)
     } else {
         return null
     }
 }
 
-async function validateDataTypeObject(input, fieldInputError){
-    if (typeof(input)!== 'object') {
-        return fieldInputError.push(input)
+function validateDataTypeObject(input, fieldInputError, key, fieldOne, fieldTwo){
+    if (typeof(input)!== 'object' || Object.keys(input) === [fieldOne,fieldTwo]) {
+        console.log(input)
+        return fieldInputError.push(key)
     }else {
         return null
     }

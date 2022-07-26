@@ -77,18 +77,20 @@ async function main() {
     //   email
     // })
 
+    console.log(locationSpotted)
+
     let fieldInputError = []
 
-    validation.validateDataTypeNumber(birdSize, fieldInputError)
-    validation.validateDataTypeString(birdFamily, fieldInputError) 
-    validation.validateDataTypeString(birdSpecies, fieldInputError) 
-    validation.validateDataTypeObject(birdColours, fieldInputError)
-    validation.validateDataTypeString(dateSpotted, fieldInputError)
-    validation.validateDataTypeString(neighbourhoodSpotted, fieldInputError)
-    validation.validateDataTypeObject(locationSpotted, fieldInputError)
-    validation.validateDataTypeString(imageUrl, fieldInputError)
-    validation.validateDataTypeString(displayName, fieldInputError)
-    validation.validateDataTypeString(email, fieldInputError)
+    validation.validateDataTypeNumber(birdSize, fieldInputError,'birdSize');
+    validation.validateDataTypeString(birdFamily, fieldInputError, 'birdFamily');
+    validation.validateDataTypeString(birdSpecies, fieldInputError, 'birdSpecies');
+    validation.validateDataTypeObject(birdColours, fieldInputError, 'birdColours');
+    validation.validateDataTypeString(dateSpotted, fieldInputError, 'dateSpotted');
+    validation.validateDataTypeString(neighbourhoodSpotted, fieldInputError, 'neightbourhoodSpotted');
+    validation.validateDataTypeObject(locationSpotted, fieldInputError, 'locationSpotted', 'lat', 'lng');
+    validation.validateDataTypeString(imageUrl, fieldInputError, 'imageUrl');
+    validation.validateDataTypeString(displayName, fieldInputError, 'displayName');
+    validation.validateDataTypeString(email, fieldInputError, 'email');
     
     console.log(fieldInputError)
 
