@@ -58,24 +58,12 @@ async function main() {
     let neighbourhoodSpotted = req.body.neighbourhoodSpotted
     let locationSpotted = req.body.locationSpotted;
     let imageUrl = req.body.imageUrl;
-    let character = req.body.character
+    let character = req.body.character;
+    let description= req.body.description;
     let datePosted = new Date();
     let displayName = req.body.displayName;
     let email = req.body.email;
-    // let result = await db.collection('sightings').insertOne({
-    //   birdSize,
-    //   birdFamily,
-    //   birdSpecies,
-    //   birdColours,
-    //   dateSpotted,
-    //   neighbourhoodSpotted,
-    //   locationSpotted,
-    //   imageUrl,
-    //   character,
-    //   datePosted,
-    //   displayName,
-    //   email
-    // })
+    
 
     console.log(locationSpotted)
 
@@ -89,6 +77,7 @@ async function main() {
     validation.validateDataTypeString(neighbourhoodSpotted, fieldInputError, 'neightbourhoodSpotted');
     validation.validateDataTypeObject(locationSpotted, fieldInputError, 'locationSpotted', 'lat', 'lng');
     validation.validateDataTypeString(imageUrl, fieldInputError, 'imageUrl');
+    validation.validateDataTypeString(description, fieldInputError, 'description');
     validation.validateDataTypeString(displayName, fieldInputError, 'displayName');
     validation.validateDataTypeString(email, fieldInputError, 'email');
     
@@ -107,6 +96,7 @@ async function main() {
         locationSpotted,
         imageUrl,
         character,
+        description,
         datePosted,
         displayName,
         email
@@ -326,6 +316,7 @@ async function main() {
     let locationSpotted = req.body.locationSpotted;
     let imageUrl = req.body.imageUrl;
     let character = req.body.character;
+    let description = req.body.description;
     let displayName = req.body.displayName;
     let email = req.body.email;
     
@@ -342,6 +333,7 @@ async function main() {
         locationSpotted,
         imageUrl,
         character,
+        description,
         displayName,
         email
       }
