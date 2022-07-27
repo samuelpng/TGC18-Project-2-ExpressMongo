@@ -39,13 +39,6 @@ async function main() {
     })
     res.status(200).json(result)
 
-    // if (typeof(commentDescription) !== "string"){
-    //   res.status(406).send('description error')
-    // }else {
-    //   res.status(200);
-    //   res.send(result.id);
-    //   // res.send(result.id)
-    // }
 
   })
 
@@ -107,22 +100,7 @@ async function main() {
     }
 
 
-    // if (typeof(birdSize) !== 'number' || (birdSize<1 || birdSize >7) ){
-    //   res.status(406).send('birdSize error')
-    // }else if (typeof(birdFamily) !== "string"){
-    //   res.status(406).send('birdFamily error')
-    // }else if (typeof(birdSpecies) !== "string"){
-    //   res.status(406).send('birdSpecies error')
-    // }else if (typeof(birdColours) !== "object"){
-    //   res.status(406).send('birdColours error')
-    // }else if (typeof(neighbourhoodSpotted) !== "string"){
-    //   res.status(406).send('neighbourhoodSpotted error')
-    // }else if (typeof(locationSpotted) !== "object"){
-    //   res.status(406).send('locationSpotted error')
-    // }else{
-    //   res.status(200);
-    //   res.send(result);
-    // }  
+    
   })
 
   app.get('/bird_sightings/:id', async function (req, res) {
@@ -197,12 +175,6 @@ async function main() {
       ]
     }
 
-    //birdFamily
-    // if(req.query.birdFamily) {
-    //   criteria['birdFamily'] = {
-    //     '$regex' : req.query.birdFamily, '$options':'i'
-    //   }
-    // }
 
     //query on bird colours
     if (req.query.birdColours) {
@@ -213,29 +185,20 @@ async function main() {
       }
     } else {
       criteria['$and'] = req.query.birdColours.map(colour => { return {"birdColours": {"$in" : [colour] } }});    
-      // url eg.: ?birdColours[]=red&birdColours[]=Brown
-    }
-      // criteria['birdColours'] = {
-      //   '$in' : [...req.query.birdColours]
-      // }
+      
     }
 
-    //query on bird size
-    // if (req.query.birdSize) {
-    //   criteria['birdSize'] = {
-    //     '$eq' : parseInt(req.query.birdSize)
-    //   }
-    // }
+    }
 
-    // if (req.query.birdSize) {
-    //   criteria['birdSize'] = {
-    //     '$eq' : parseInt(req.query.birdSize)
-    //   }
-    // }
+
+   
 
     if (req.query.birdSize) {
-      criteria['$or'] = req.query.birdSize.map(size => { return {"birdSize": {"$in" : [parseInt(size)] } }})
+      criteria['birdSize'] = {
+        '$in' : [parseInt(req.query.birdSize)]
+      }
     }
+
 
 
     //query on neighbourhood
@@ -284,26 +247,7 @@ async function main() {
     res.json(results);
   })
 
-  // app.get('/bird_sightings/profile', async function(req,res) {
-
-  //   let criteria = {};
-  //   let projection = {
-  //     projection:{
-  //         "email": 0
-  //     }
-  //   }
-
-  //   if (req.query.email) {
-  //     criteria['email'] = {
-  //       '$eq' : [req.query.birdFamily]
-  //     }
-  //   }
-
-  //   let results = await db.collection('sightings').find(criteria, projection).toArray()
-  //   res.status(200)
-  //   console.log(criteria)
-  //   res.json(results);
-  // })
+  
 
 
   app.put('/bird_sightings/:id', async function (req, res) {
