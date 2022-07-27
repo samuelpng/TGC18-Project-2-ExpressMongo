@@ -69,10 +69,10 @@ async function main() {
     validation.validateDataTypeString(dateSpotted, fieldInputError, 'dateSpotted');
     validation.validateDataTypeString(neighbourhoodSpotted, fieldInputError, 'neightbourhoodSpotted');
     validation.validateDataTypeObject(locationSpotted, fieldInputError, 'locationSpotted', 'lat', 'lng');
-    validation.validateDataTypeString(imageUrl, fieldInputError, 'imageUrl');
+    validation.validateUrl(imageUrl, fieldInputError, 'imageUrl');
     validation.validateDataTypeString(description, fieldInputError, 'description');
     validation.validateDataTypeString(displayName, fieldInputError, 'displayName');
-    validation.validateDataTypeString(email, fieldInputError, 'email');
+    validation.validateEmail(email, fieldInputError, 'email');
     
     console.log(fieldInputError)
 
@@ -304,9 +304,9 @@ async function main() {
 main();
 
 //START SERVER
-// app.listen(8000, () => {
-//   console.log("Server has started")
-// })
-app.listen(process.env.PORT, () => {
+app.listen(8000, () => {
   console.log("Server has started")
 })
+// app.listen(process.env.PORT, () => {
+//   console.log("Server has started")
+// })
